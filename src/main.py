@@ -1,17 +1,25 @@
 # src/main.py
 from __future__ import annotations
 import time
+from threading import Thread
+
 from .scheduler import build_scheduler
+from .web import run as run_web
 
 def main():
+    # מפעיל את הסקד׳יולר (שליחה יומית, שבועית, ופול לשינויים)
     sched = build_scheduler()
     sched.start()
-    print("Scheduler started. Press Ctrl+C to stop.")
+
+    # מפעיל את שרת ה-HTTP הקטן ברקע כדי של-Render יהיה פורט פתוח
+    t = Thread(target=run_web, daemon=True)
+    t.start()
+
+    # מונע מהתהליך להסתיים
     try:
         while True:
-            time.sleep(1)
+            time.sleep(3600)
     except KeyboardInterrupt:
-        print("Shutting down scheduler...")
         sched.shutdown()
 
 if __name__ == "__main__":
